@@ -23,8 +23,8 @@ public class GamePanel extends JPanel {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final long serialVersionUID = 2315822834624951903L;
 	private JMenuBar Menu;
-	private JPanel ViewPanel;
-	private JLabel Resource;
+	public JPanel ViewPanel;
+	public JLabel Resource;
 
 	public GamePanel() {
 		
@@ -101,7 +101,10 @@ public class GamePanel extends JPanel {
 		JMenuItem viewsItem = new JMenuItem("View");
 		viewsItem.addActionListener(event -> {
 			ViewPanel.removeAll();
-			ViewPanel.add(new WorldView()); 
+			WorldView wv = new WorldView();
+			wv.setBounds(ViewPanel.getBounds());
+			ViewPanel.add(wv);
+			ViewPanel.revalidate();
 			ViewPanel.repaint();
 		});
 		worldMenu.add(viewsItem);
@@ -139,6 +142,7 @@ public class GamePanel extends JPanel {
 		
 		Menu.setBounds(0, 0, screenSize.width, screenSize.height/20);
 		ViewPanel.setBounds(0, screenSize.height/20+5, screenSize.width, screenSize.height);
+		ViewPanel.setBorder(BorderFactory.createEtchedBorder());
 	}
 	
 	

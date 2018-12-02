@@ -1,10 +1,18 @@
 package graphics.menu.world;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import main.App;
@@ -12,47 +20,97 @@ import serverclasses.Chunk;
 import serverclasses.Tile;
 
 public class WorldView extends JPanel {
-	long px;
-	long py;
+	long tx;
+	long ty;
 	private static final long serialVersionUID = 8511667415115269257L;
 	BufferedImage img;
 	int scale = 10;
 	Tile[][] array;
+	Point old;
+	Timer t;
+	Point drawcoor = new Point(0, 0);
 
 	public WorldView() {
 		super();
+		old = new Point(0, 0);
 		System.out.println("Array");
 		array = new Tile[App.chunksize * 3][App.chunksize * 3];
 		updateArray();
 		System.out.println("Image");
 		drawImage();
+		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		System.out.println("Listener");
-		
+		addMouseListener(new MouseListener() {
+			public void mouseClicked(MouseEvent e) {
+				/* Useless */}
+
+			public void mouseEntered(MouseEvent e) {
+				/* Useless */}
+
+			public void mouseExited(MouseEvent e) {
+				/* Useless */}
+
+			public void mousePressed(MouseEvent e) {
+				old = e.getPoint();
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				/* Useless */}
+		});
+		addMouseMotionListener(new MouseMotionListener() {
+			public void mouseMoved(MouseEvent e) {
+				/* Useless */}
+
+			public synchronized void mouseDragged(MouseEvent e) {
+				int difx = (old.x - e.getX());
+				int dify = (old.y - e.getY());
+				tx += (long)difx;
+				ty += (long)dify;
+				drawcoor.x -= difx*scale;
+				drawcoor.y -= dify*scale;
+				old = e.getPoint();
+				System.out.println(drawcoor.x + " " + drawcoor.y);
+			}
+		});
+		this.addMouseWheelListener(e -> {
+			scale -= e.getWheelRotation();
+			if (scale < 4)
+				scale = 4;
+		});
+		System.out.println("Borderatering");
+		setBounds(App.game.gp.ViewPanel.getBounds());
+		setPreferredSize(App.game.gp.ViewPanel.getSize());
+		setBorder(BorderFactory.createEtchedBorder());
 		System.out.println("Repaint");
-		repaint();
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			public synchronized void run() {
+				//long start = System.currentTimeMillis();
+				updateArray();
+				drawImage();
+				teleport();
+				repaint();
+				//System.out.printf("Time for repaint: %dms Current Chunk: %d, %d\n",
+				//		(System.currentTimeMillis() - start), tx / App.chunksize, ty / App.chunksize);
+			}
+		}, 0, 50);
 		System.out.println("Finalization");
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(img, 0, 0, null);
+		g.drawImage(img, drawcoor.x, drawcoor.y, null);
 	}
 
 	private void drawImage() {
 		img = new BufferedImage(array.length * scale, array[0].length * scale, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = img.createGraphics();
-		g2d.fillRect(0, 0 , array.length * scale, array[0].length * scale);
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0; i < array.length; i++)
 			for (int j = 0; j < array[i].length; j++) {
-				Color c = getColor(array[i][j].elevation);
-				System.out.print(c.getRGB() + "\t");
-				g2d.setColor(c);
+				g2d.setColor(getColor(array[i][j].elevation));
 				g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
 			}
-			System.out.println("\n");
-		}
-
 	}
 
 	private Color getColor(int temp) {
@@ -91,17 +149,20 @@ public class WorldView extends JPanel {
 		}
 	}
 
-	public void updateArray() {
-		Chunk[][] cs = App.getChunks(px, py);
+	private void updateArray() {
+		Chunk[][] cs = App.getChunks((int) (tx / App.chunksize), (int) (ty / App.chunksize));
 		for (int x = 0; x < cs.length; x++)
 			for (int y = 0; y < cs.length; y++)
 				oneArray(cs[x][y].data, x * 100, y * 100);
 	}
 
-	public void oneArray(Tile[][] c, int sx, int sy) {
+	private void oneArray(Tile[][] c, int sx, int sy) {
 		for (int x = 0; x < c.length; x++)
 			for (int y = 0; y < c[0].length; y++)
 				array[x + sx][y + sy] = c[x][y];
+	}
 
+	private void teleport() {
+		drawcoor = new Point((int)Math.floorMod(tx, App.chunksize) * scale, (int)Math.floorMod(ty, App.chunksize) * scale);
 	}
 }

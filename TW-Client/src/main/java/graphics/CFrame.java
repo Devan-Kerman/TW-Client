@@ -5,8 +5,10 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
+
 public class CFrame extends JFrame {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	public GamePanel gp;
 	/**
 	 * 
 	 */
@@ -14,7 +16,8 @@ public class CFrame extends JFrame {
 	
 	public CFrame(String s) {
 		super(s);
-		add(new GamePanel());
+		gp = new GamePanel();
+		add(gp);
 		pack();
 		setVisible(true);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);

@@ -20,7 +20,7 @@ public class App {
 	public static final String ADDRESS = "localhost";
 	public static final int PORT = 6702;
 	public static int chunksize;
-
+	public static CFrame game = new CFrame("Tile Wars Client 1.0");
 	public static void main(String[] args) {
 		try {
 			s = new Socket(ADDRESS, PORT);
@@ -40,15 +40,15 @@ public class App {
 			e.printStackTrace();
 		}
 		chunksize = 100;
-		new CFrame("Tile Wars Client 1.0");
+		
 	}
 	
-	public static Chunk[][] getChunks(long px, long py) {
+	public static Chunk[][] getChunks(int cx, int cy) {
 		k.writeObject(out, 0);
 		out.flush();
-		k.writeObject(out, px/chunksize);
+		k.writeObject(out, cx);
 		out.flush();
-		k.writeObject(out, py/chunksize);
+		k.writeObject(out, cy);
 		out.flush();
 		return k.readObject(in, Chunk[][].class);
 	}
