@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -33,11 +34,11 @@ public class WorldView extends JPanel {
 	public WorldView() {
 		super();
 		old = new Point(0, 0);
-		System.out.println("Array");
+		//System.out.println("Array");
 		array = new Tile[App.chunksize * 3][App.chunksize * 3];
-		updateArray();
-		System.out.println("Image");
-		drawImage();
+		//updateArray();
+		//System.out.println("Image");
+		//drawImage();
 		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		System.out.println("Listener");
 		addMouseListener(new MouseListener() {
@@ -60,14 +61,13 @@ public class WorldView extends JPanel {
 		addMouseMotionListener(new MouseMotionListener() {
 			public void mouseMoved(MouseEvent e) {
 				/* Useless */}
-
-			public synchronized void mouseDragged(MouseEvent e) {
+			public void mouseDragged(MouseEvent e) {
 				int difx = (old.x - e.getX());
 				int dify = (old.y - e.getY());
 				tx += (long)difx;
 				ty += (long)dify;
-				drawcoor.x -= difx*scale;
-				drawcoor.y -= dify*scale;
+				drawcoor.x = (int)((tx%App.chunksize)*scale+App.chunksize*scale);
+				drawcoor.y = (int)((ty%App.chunksize)*scale+App.chunksize*scale);
 				old = e.getPoint();
 			}
 		});
@@ -83,33 +83,38 @@ public class WorldView extends JPanel {
 		System.out.println("Repaint");
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
-			public synchronized void run() {
+			public void run() {
 				//long start = System.currentTimeMillis();
-				updateArray();
-				drawImage();
-				teleport();
-				repaint();
+				frame();
 				//System.out.printf("Time for repaint: %dms Current Chunk: %d, %d\n",
 				//		(System.currentTimeMillis() - start), tx / App.chunksize, ty / App.chunksize);
 			}
 		}, 0, 50);
 		System.out.println("Finalization");
 	}
+	public synchronized void frame() {
+		repaint();
+		updateArray();
+		drawImage();
+	}
+	
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(img, drawcoor.x, drawcoor.y, null);
+		g.drawImage(img, 0, 0, null);
 	}
 
 	private void drawImage() {
-		img = new BufferedImage(array.length * scale, array[0].length * scale, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2d = img.createGraphics();
-		for (int i = 0; i < array.length; i++)
-			for (int j = 0; j < array[i].length; j++) {
+		Rectangle r = this.getBounds();
+		BufferedImage img2 = new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = img2.createGraphics();
+		for (int i = (int)tx%100; i < r.width/scale+1 + (int)tx%100; i++)
+			for (int j = (int)ty%100; j < r.height/scale+1 + (int)ty%100; j++) {
 				g2d.setColor(getColor(array[i][j].elevation));
 				g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
 			}
+		img = img2;
 	}
 
 	private Color getColor(int temp) {
@@ -159,9 +164,5 @@ public class WorldView extends JPanel {
 		for (int x = 0; x < c.length; x++)
 			for (int y = 0; y < c[0].length; y++)
 				array[x + sx][y + sy] = c[x][y];
-	}
-
-	private void teleport() {
-		drawcoor = new Point((int)Math.floorMod(tx, App.chunksize) * scale, (int)Math.floorMod(ty, App.chunksize) * scale);
 	}
 }
