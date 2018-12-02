@@ -17,13 +17,13 @@ import serverclasses.Tile;
 
 public class VPanel extends JPanel {
 	private static final long serialVersionUID = 1064812704658251024L;
-	private double scale = 10;
+	private int scale = 10;
 	private final Tile[][] array;
 	BufferedImage img;
 
 	public VPanel(Tile[][] arr) {
 		array = arr;
-		img = new BufferedImage(arr.length * 10, arr[0].length * 10, BufferedImage.TYPE_INT_ARGB);
+		img = new BufferedImage(arr.length * scale, arr[0].length * scale, BufferedImage.TYPE_INT_ARGB);
 		drawImage(img);
 		addMouseWheelListener(new MouseWheelListener() {
 			@Override
