@@ -42,7 +42,7 @@ public class WorldView extends JPanel {
 	private void drawImage() {
 		img = new BufferedImage(array.length * scale, array[0].length * scale, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = img.createGraphics();
-		g2d.fillRect(array.length * scale, array[0].length * scale, width, height);
+		g2d.fillRect(0, 0 , array.length * scale, array[0].length * scale);
 		for (int i = 0; i < array.length; i++) {
 			for (int j = 0; j < array[i].length; j++) {
 				Color c = getColor(array[i][j].elevation);
