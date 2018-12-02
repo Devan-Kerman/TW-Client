@@ -69,7 +69,6 @@ public class WorldView extends JPanel {
 				drawcoor.x -= difx*scale;
 				drawcoor.y -= dify*scale;
 				old = e.getPoint();
-				System.out.println(drawcoor.x + " " + drawcoor.y);
 			}
 		});
 		this.addMouseWheelListener(e -> {
