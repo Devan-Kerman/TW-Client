@@ -37,7 +37,7 @@ public class WorldView extends JPanel {
 		super();
 		cp = new Point(0, 0);
 		old = new Point(0, 0);
-		array = new Tile[App.chunksize * 3][App.chunksize * 3];
+		array = new Tile[App.CHUNKSIZE * 3][App.CHUNKSIZE * 3];
 		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		System.out.println("Listener");
 		addMouseListener(new MouseListener() {
@@ -118,15 +118,14 @@ public class WorldView extends JPanel {
 		Timer timer2 = new Timer(true);
 		timer2.schedule(new TimerTask() {
 			Point oldp = new Point(0, 0);
-
-			@Override
+			
 			public void run() {
-				if (cp.x != oldp.x || cp.y != oldp.y) {
+				Point faker = getFakeCP();
+				if (faker.x != oldp.x || faker.y != oldp.y) {
 					updateArray();
 					updateCP();
 					oldp.setLocation(cp);
-				} else
-					updateCP();
+				}
 			}
 		}, 0, 50);
 		System.out.println("Finalization");
@@ -144,31 +143,31 @@ public class WorldView extends JPanel {
 
 	public void updateCP() {
 		if (tx < 0)
-			cp.x = (int) (tx / App.chunksize - 1);
+			cp.x = (int) (tx / App.CHUNKSIZE - 1);
 		else
-			cp.x = (int) (tx / App.chunksize);
+			cp.x = (int) (tx / App.CHUNKSIZE);
 		if (ty < 0)
-			cp.y = (int) (ty / App.chunksize - 1);
+			cp.y = (int) (ty / App.CHUNKSIZE - 1);
 		else
-			cp.y = (int) (ty / App.chunksize);
+			cp.y = (int) (ty / App.CHUNKSIZE);
 	}
 
 	public Point getFakeCP() {
 		Point fp = new Point(0, 0);
 		if (tx < 0)
-			fp.x = (int) (tx / App.chunksize - 1);
+			fp.x = (int) (tx / App.CHUNKSIZE - 1);
 		else
-			fp.x = (int) (tx / App.chunksize);
+			fp.x = (int) (tx / App.CHUNKSIZE);
 		if (ty < 0)
-			fp.y = (int) (ty / App.chunksize - 1);
+			fp.y = (int) (ty / App.CHUNKSIZE - 1);
 		else
-			fp.y = (int) (ty / App.chunksize);
+			fp.y = (int) (ty / App.CHUNKSIZE);
 		return fp;
 	}
 	Font myFont = new Font("Serif", Font.BOLD, 8);
 	private void drawImage() {
-		int ax = (int) Math.abs(tx - cp.x * App.chunksize);
-		int ay = (int) Math.abs(ty - cp.y * App.chunksize);
+		int ax = (int) Math.abs(tx - cp.x * App.CHUNKSIZE);
+		int ay = (int) Math.abs(ty - cp.y * App.CHUNKSIZE);
 		Rectangle r = this.getBounds();
 		BufferedImage img2 = new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = img2.createGraphics();
