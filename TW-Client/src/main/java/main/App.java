@@ -17,7 +17,7 @@ public class App {
 	public static Input in;
 	public static Output out;
 	public static Kryo k;
-	public static final String ADDRESS = "localhost";
+	public static final String ADDRESS = "98.194.106.190";
 	public static final int PORT = 6702;
 	public static int chunksize;
 	public static CFrame game = new CFrame("Tile Wars Client 1.0");
