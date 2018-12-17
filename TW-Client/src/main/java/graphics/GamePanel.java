@@ -101,10 +101,7 @@ public class GamePanel extends JPanel {
 		JMenuItem viewsItem = new JMenuItem("View");
 		viewsItem.addActionListener(event -> {
 			ViewPanel.removeAll();
-			WorldView wv = new WorldView();
-			wv.setBounds(ViewPanel.getBounds());
-			ViewPanel.add(wv);
-			ViewPanel.revalidate();
+			ViewPanel.add(new WorldView());
 			ViewPanel.repaint();
 		});
 		worldMenu.add(viewsItem);

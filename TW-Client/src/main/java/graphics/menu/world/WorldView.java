@@ -32,7 +32,7 @@ public class WorldView extends JPanel {
 	Tile[][] array;
 	Point old;
 	Timer t;
-
+	
 	public WorldView() {
 		super();
 		cp = new Point(0, 0);
@@ -43,21 +43,19 @@ public class WorldView extends JPanel {
 		addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
 				/* Useless */}
-
 			public void mouseEntered(MouseEvent e) {
 				/* Useless */}
-
 			public void mouseExited(MouseEvent e) {
 				/* Useless */}
-
 			public void mousePressed(MouseEvent e) {
-				old = e.getPoint();
+				if(e.getButton() == MouseEvent.BUTTON1)
+					old = e.getPoint();
+				else {
+					
+				}
 				requestFocusInWindow();
 			}
-
-			public void mouseReleased(MouseEvent e) {
-
-				/* Useless */}
+			public void mouseReleased(MouseEvent e) {/* Useless */}
 		});
 		addMouseMotionListener(new MouseMotionListener() {
 			public void mouseMoved(MouseEvent e) {
