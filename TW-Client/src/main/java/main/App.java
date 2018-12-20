@@ -17,11 +17,13 @@ public class App {
 	public static Input in;
 	public static Output out;
 	public static Kryo k;
-	public static final String ADDRESS = "devtech.play.ai";
+	public static final String ADDRESS = "localhost";
 	public static final int PORT = 6702;
 	public static final int CHUNKSIZE = 100;
-	public static CFrame game = new CFrame("Tile Wars Client 1.0");
+	public static CFrame game;
+	public static DLogger logger;
 	public static void main(String[] args) {
+		logger = new DLogger();
 		try {
 			s = new Socket(ADDRESS, PORT);
 			k = new Kryo();
@@ -35,12 +37,20 @@ public class App {
 			out = new Output(s.getOutputStream());
 			out.flush();
 			in = new Input(s.getInputStream());
-			System.out.println("Accepted! ");
+			game = new CFrame("Tile Wars Client 1.0");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
+		
 	}
+	public static void setRenderDistance(int render) {
+		k.writeObject(out, 2);
+		out.flush();
+		k.writeObject(out, render);
+		out.flush();
+	}
+	
 	
 	public static Chunk[][] getChunks(int cx, int cy) {
 		k.writeObject(out, 0);
@@ -49,6 +59,7 @@ public class App {
 		out.flush();
 		k.writeObject(out, cy);
 		out.flush();
+		logger.info("Grabbing new chunks");
 		return k.readObject(in, Chunk[][].class);
 	}
 }

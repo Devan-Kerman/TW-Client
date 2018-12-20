@@ -13,11 +13,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import graphics.LongPoint;
@@ -26,29 +24,24 @@ import serverclasses.Chunk;
 import serverclasses.Tile;
 
 public class WorldView extends JPanel {
-	LongPoint tile = new LongPoint(1000, 1000);
-	LongPoint selected = new LongPoint(0, 0);
+	public LongPoint tile = new LongPoint(1000, 1000);
+	public LongPoint selected = new LongPoint(0, 0);
 
 	private static final long serialVersionUID = 8511667415115269257L;
 	BufferedImage img;
 	int scale = 50;
 	Tile[][] array;
 	Point old;
-	Timer t;
-	Random r;
-	boolean slowmode = false;
+	public int renderdistance = 1;
 
-	int cx;
-	int cy;
+	public int cx;
+	public int cy;
 
 	public WorldView() {
 		super();
-		requestFocusInWindow();
-		r = new Random();
-		old = new Point(0, 0);
 		array = new Tile[App.CHUNKSIZE * 3][App.CHUNKSIZE * 3];
+		old = new Point(0, 0);
 		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-		System.out.println("Listener");
 		addMouseListener(new MouseListener() {
 			public void mouseClicked(MouseEvent e) {
 				/* Useless */}
@@ -81,21 +74,17 @@ public class WorldView extends JPanel {
 				selected.x = tile.x + p.x / scale;
 				selected.y = tile.y + p.y / scale;
 				old = e.getPoint();
-
 			}
 		});
 		addMouseWheelListener(e -> {
 			scale -= e.getWheelRotation();
 			if (scale < 4)
 				scale = 4;
-			System.out.println("Current zoom: " + scale);
 		});
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				keymethod(e);
-				if (e.getKeyCode() == KeyEvent.VK_G)
-					slowmode = !slowmode;
 			}
 
 			@Override
@@ -108,54 +97,31 @@ public class WorldView extends JPanel {
 				keymethod(e);
 			}
 
-			boolean toggled = true;
-
 			private void keymethod(KeyEvent e) {
 				int key = e.getKeyCode();
-				if (toggled) {
-					if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT) {
-						tile.x--;
-					} else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT) {
-						tile.x++;
-					} else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_KP_UP) {
-						tile.y--;
-					} else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_KP_DOWN) {
-						tile.y++;
-					} else if (key == KeyEvent.VK_PLUS) {
-						scale++;
-					} else if (key == KeyEvent.VK_MINUS) {
-						scale--;
-					} else if (key == KeyEvent.VK_0) {
-						System.out.println(tile.toString());
-					}
-					toggled = false;
+				if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT) {
+					tile.x--;
+				} else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT) {
+					tile.x++;
+				} else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_KP_UP) {
+					tile.y--;
+				} else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_KP_DOWN) {
+					tile.y++;
+				} else if (key == KeyEvent.VK_PLUS) {
+					scale++;
+				} else if (key == KeyEvent.VK_MINUS) {
+					scale--;
 				}
-				toggled = true;
 				if (scale < 4)
 					scale = 4;
 			}
 		});
-		System.out.println("Borderatering");
-		setBounds(App.game.gp.ViewPanel.getBounds());
-		setPreferredSize(App.game.gp.ViewPanel.getSize());
-		setBorder(BorderFactory.createEtchedBorder());
-		System.out.println("Repaint");
 		updateArray();
 		Timer timer = new Timer(true);
 		timer.schedule(new TimerTask() {
 			public void run() {
-				if (slowmode) {
-					try {
-						Thread.sleep(250);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					drawImage();
-					repaint();
-				} else {
-					drawImage();
-					repaint();
-				}
+				drawImage();
+				repaint();
 			}
 		}, 0, 50);
 		Timer timer2 = new Timer(true);
@@ -170,9 +136,9 @@ public class WorldView extends JPanel {
 				}
 			}
 		}, 0, 50);
-		System.out.println("Finalization");
 		setFocusable(true);
 		requestFocusInWindow();
+		App.logger.relief("World View Initialized!");
 	}
 
 	@Override
@@ -197,16 +163,20 @@ public class WorldView extends JPanel {
 	Font chunkFont = new Font("Serif", Font.BOLD, 50);
 	Font tileFont;
 
+	private Point getArrayPoint() {
+		return new Point((int) (tile.x - cx * App.CHUNKSIZE) + App.CHUNKSIZE,
+				(int) (tile.y - cy * App.CHUNKSIZE) + App.CHUNKSIZE);
+	}
+
 	private void drawImage() {
 		tileFont = new Font("Serif", Font.BOLD, scale / 6);
-		int ax = (int) (tile.x - cx * App.CHUNKSIZE) + App.CHUNKSIZE;
-		int ay = (int) (tile.y - cy * App.CHUNKSIZE) + App.CHUNKSIZE;
+		Point a = getArrayPoint();
 		Rectangle rect = this.getBounds();
-		BufferedImage img2 = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage img2 = new BufferedImage(rect.width + 1, rect.height + 1, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = img2.createGraphics();
-		for (int i = 0; i * scale < rect.width && i + ax < array.length && i + ax > 0; i++)
-			for (int j = 0; j * scale < rect.height && j + ay < array[0].length && j + ay > 0; j++) {
-				g2d.setColor(getColor(array[i + ax][j + ay].elevation));
+		for (int i = 0; i * scale < rect.width && i + a.x < array.length && i + a.x > 0; i++)
+			for (int j = 0; j * scale < rect.height && j + a.y < array[0].length && j + a.y > 0; j++) {
+				g2d.setColor(getColor(array[i + a.x][j + a.y].elevation));
 				g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
 				if (selected.x == i + tile.x && selected.y == j + tile.y) {
 					g2d.setColor(new Color(255, 100, 100, 100));
@@ -220,19 +190,39 @@ public class WorldView extends JPanel {
 	}
 
 	private void updateArray() {
+		Point a = getArrayPoint();
+		Rectangle rect = this.getBounds();
+		if (rect.width / scale + a.x > array.length || rect.height / scale + a.y > array[0].length) {
+			renderdistance++;
+			if (renderdistance <= 2)
+				App.logger.info("Render distance increased to: " + renderdistance);
+			else
+				App.logger.warn("Render distance is greater than 2: " + renderdistance);
+		} else if (rect.width / scale + a.x < array.length - 100 || rect.height / scale + a.y < array[0].length - 100) {
+			renderdistance--;
+			if (renderdistance <= 2)
+				App.logger.relief("Render distance decreased to: " + renderdistance);
+			else
+				App.logger.warn("Render distance is still greater than 2: " + renderdistance);
+		}
+		if (renderdistance > 5)
+			renderdistance = 5;
+		App.setRenderDistance(renderdistance);
 		Point fp = getFakeCP();
 		Chunk[][] cs = App.getChunks(fp.x, fp.y);
+		Tile[][] array2 = new Tile[App.CHUNKSIZE * cs.length][App.CHUNKSIZE * cs[0].length];
 		for (int x = 0; x < cs.length; x++)
 			for (int y = 0; y < cs.length; y++)
-				oneArray(cs[x][y].data, x * 100, y * 100);
+				oneArray(array2, cs[x][y].data, x * 100, y * 100);
 		cx = cs[0][0].x;
 		cy = cs[0][0].y;
+		this.array = array2;
 	}
 
-	private void oneArray(Tile[][] c, int sx, int sy) {
+	private void oneArray(Tile[][] array2, Tile[][] c, int sx, int sy) {
 		for (int x = 0; x < c.length; x++)
 			for (int y = 0; y < c[0].length; y++)
-				array[x + sx][y + sy] = c[x][y];
+				array2[x + sx][y + sy] = c[x][y];
 	}
 
 	private Color getColor(int temp) {
@@ -265,7 +255,7 @@ public class WorldView extends JPanel {
 			return new Color(0, 5 + (int) ((temp + 200) * 0.125), 119 + (int) ((temp + 200) * 2.975));
 		else if (temp <= -240)
 			return new Color(0, 0, 0);
-		System.out.println("Break");
-		return new Color(r.nextInt());
+		App.logger.error("Invalid Elevation! " + temp);
+		return Color.BLACK;
 	}
 }

@@ -1,16 +1,45 @@
 package graphics.menu.debug;
 
-import javax.swing.BorderFactory;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 
 import main.App;
 
+
 public class DebugErrors extends JPanel {
 	private static final long serialVersionUID = 8511667415115269257L;
+	private JList<String> list;
+	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
 	public DebugErrors() {
 		super();
-		setBounds(App.game.gp.ViewPanel.getBounds());
-		setPreferredSize(App.game.gp.ViewPanel.getSize());
-		setBorder(BorderFactory.createEtchedBorder());
+		DefaultListModel<String> dlm = new DefaultListModel<>();
+
+		list = new JList<>(dlm);
+
+		add(list);
+
+		list.setBounds(screenSize.width/4, 16, screenSize.width/2, (int) (screenSize.height/1.5));
+		
+		list.setBackground(new Color(125,125,125));
+		setBackground(new Color(100,100,100));
+		
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			public void run() {
+				dlm.clear();
+				App.logger.errors.forEach(dlm::addElement);
+			}
+		}, 0, 100);
+		
+		App.logger.relief("Debug Errors Initialized!");
 	}
 }
