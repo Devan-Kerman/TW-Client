@@ -2,7 +2,6 @@ package main;
 
 import java.net.Socket;
 
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -22,6 +21,7 @@ public class App {
 	public static final int CHUNKSIZE = 100;
 	public static CFrame game;
 	public static DLogger logger;
+
 	public static void main(String[] args) {
 		logger = new DLogger();
 		try {
@@ -41,17 +41,16 @@ public class App {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+
 	}
+
 	public static void setRenderDistance(int render) {
 		k.writeObject(out, 2);
 		out.flush();
 		k.writeObject(out, render);
 		out.flush();
 	}
-	
-	
+
 	public static Chunk[][] getChunks(int cx, int cy) {
 		k.writeObject(out, 0);
 		out.flush();

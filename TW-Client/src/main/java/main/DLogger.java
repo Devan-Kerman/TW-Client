@@ -49,7 +49,8 @@ public class DLogger {
 	}
 
 	/*
-	 * Error = #ff0000 Warn = #ff6600 Info = #ffffff Debug = #33ccff Relief = #99ff66
+	 * Error = #ff0000 Warn = #ff6600 Info = #ffffff Debug = #33ccff Relief =
+	 * #99ff66
 	 */
 	private String levelHex(Level l) {
 		if (l.intValue() == Level.SEVERE.intValue())
@@ -58,7 +59,7 @@ public class DLogger {
 			return "#ff6600";
 		else if (l.intValue() == Level.CONFIG.intValue())
 			return "#33ccff";
-		else if(l.intValue() == Level.FINE.intValue())
+		else if (l.intValue() == Level.FINE.intValue())
 			return "#99ff66";
 		return "#ffffff";
 	}

@@ -1,6 +1,5 @@
 package graphics;
 
-
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
@@ -35,13 +34,13 @@ public class GamePanel extends JPanel {
 	public JPanel ViewPanel;
 
 	public GamePanel() {
-		super(); 
+		super();
 		ViewPanel = new JPanel();
 		ViewPanel.setBounds(0, screenSize.height / 20 + 5, screenSize.width, screenSize.height);
 		ViewPanel.setBorder(BorderFactory.createEtchedBorder());
-		
+
 		JMenu nationMenu = new JMenu("Nation");
-		
+
 		NationFriends friends = new NationFriends();
 		addCL(nationMenu, new JMenuItem("Friends"), friends);
 		NationStats stats = new NationStats();
@@ -98,10 +97,10 @@ public class GamePanel extends JPanel {
 		object.setBounds(ViewPanel.getBounds());
 		object.setPreferredSize(ViewPanel.getSize());
 		object.setBorder(BorderFactory.createEtchedBorder());
-		object.setLayout(null);
 		item.addActionListener(event -> {
 			ViewPanel.removeAll();
 			ViewPanel.add(object);
+			ViewPanel.repaint();
 			ViewPanel.revalidate();
 		});
 		menu.add(item);

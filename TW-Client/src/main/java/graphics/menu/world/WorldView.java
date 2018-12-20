@@ -24,22 +24,21 @@ import serverclasses.Chunk;
 import serverclasses.Tile;
 
 public class WorldView extends JPanel {
-	public LongPoint tile = new LongPoint(1000, 1000);
-	public LongPoint selected = new LongPoint(0, 0);
+	public static LongPoint tile = new LongPoint(1000, 1000);
+	public static LongPoint selected = new LongPoint(0, 0);
 
 	private static final long serialVersionUID = 8511667415115269257L;
 	BufferedImage img;
 	int scale = 50;
-	Tile[][] array;
+	static Tile[][] array;
 	Point old;
-	public int renderdistance = 1;
+	public static int renderdistance = 1;
 
-	public int cx;
-	public int cy;
+	public static int cx;
+	public static int cy;
 
 	public WorldView() {
 		super();
-		array = new Tile[App.CHUNKSIZE * 3][App.CHUNKSIZE * 3];
 		old = new Point(0, 0);
 		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		addMouseListener(new MouseListener() {
@@ -80,6 +79,9 @@ public class WorldView extends JPanel {
 			scale -= e.getWheelRotation();
 			if (scale < 4)
 				scale = 4;
+			else if(scale > 20)
+				scale = 20;
+			App.logger.info("Scale increased: " + scale);
 		});
 		addKeyListener(new KeyAdapter() {
 			@Override
@@ -107,7 +109,7 @@ public class WorldView extends JPanel {
 					tile.y--;
 				} else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_KP_DOWN) {
 					tile.y++;
-				} else if (key == KeyEvent.VK_PLUS) {
+				} else if (key == KeyEvent.VK_EQUALS) {
 					scale++;
 				} else if (key == KeyEvent.VK_MINUS) {
 					scale--;
@@ -147,7 +149,7 @@ public class WorldView extends JPanel {
 		g.drawImage(img, 0, 0, null);
 	}
 
-	public Point getFakeCP() {
+	public static Point getFakeCP() {
 		Point fp = new Point(0, 0);
 		if (tile.x < 0)
 			fp.x = (int) (tile.x / App.CHUNKSIZE - 1);
@@ -160,7 +162,7 @@ public class WorldView extends JPanel {
 		return fp;
 	}
 
-	Font chunkFont = new Font("Serif", Font.BOLD, 50);
+	Font chunkFont = new Font("Serif", Font.PLAIN, 50);
 	Font tileFont;
 
 	private Point getArrayPoint() {
@@ -169,7 +171,7 @@ public class WorldView extends JPanel {
 	}
 
 	private void drawImage() {
-		tileFont = new Font("Serif", Font.BOLD, scale / 6);
+		tileFont = new Font("Serif", Font.PLAIN, scale / 6);
 		Point a = getArrayPoint();
 		Rectangle rect = this.getBounds();
 		BufferedImage img2 = new BufferedImage(rect.width + 1, rect.height + 1, BufferedImage.TYPE_INT_RGB);
@@ -189,24 +191,15 @@ public class WorldView extends JPanel {
 		img = img2;
 	}
 
-	private void updateArray() {
-		Point a = getArrayPoint();
-		Rectangle rect = this.getBounds();
-		if (rect.width / scale + a.x > array.length || rect.height / scale + a.y > array[0].length) {
-			renderdistance++;
-			if (renderdistance <= 2)
-				App.logger.info("Render distance increased to: " + renderdistance);
-			else
-				App.logger.warn("Render distance is greater than 2: " + renderdistance);
-		} else if (rect.width / scale + a.x < array.length - 100 || rect.height / scale + a.y < array[0].length - 100) {
-			renderdistance--;
-			if (renderdistance <= 2)
-				App.logger.relief("Render distance decreased to: " + renderdistance);
-			else
-				App.logger.warn("Render distance is still greater than 2: " + renderdistance);
+	public static Tile getSelected() {
+		try {
+			return array[(int) (selected.x - tile.x)][(int) (selected.y - tile.y)];
+		} catch (Exception e) {
+			return new Tile();
 		}
-		if (renderdistance > 5)
-			renderdistance = 5;
+	}
+
+	private static void updateArray() {
 		App.setRenderDistance(renderdistance);
 		Point fp = getFakeCP();
 		Chunk[][] cs = App.getChunks(fp.x, fp.y);
@@ -216,10 +209,10 @@ public class WorldView extends JPanel {
 				oneArray(array2, cs[x][y].data, x * 100, y * 100);
 		cx = cs[0][0].x;
 		cy = cs[0][0].y;
-		this.array = array2;
+		array = array2;
 	}
 
-	private void oneArray(Tile[][] array2, Tile[][] c, int sx, int sy) {
+	private static void oneArray(Tile[][] array2, Tile[][] c, int sx, int sy) {
 		for (int x = 0; x < c.length; x++)
 			for (int y = 0; y < c[0].length; y++)
 				array2[x + sx][y + sy] = c[x][y];
