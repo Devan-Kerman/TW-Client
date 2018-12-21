@@ -77,9 +77,7 @@ public class WorldView extends JPanel {
 		});
 		addMouseWheelListener(e -> {
 			scale -= e.getWheelRotation();
-			if (scale < 4)
-				scale = 4;
-			else if(scale > 20)
+			if (scale < 20)
 				scale = 20;
 			App.logger.info("Scale increased: " + scale);
 		});
@@ -111,6 +109,8 @@ public class WorldView extends JPanel {
 					tile.y++;
 				} else if (key == KeyEvent.VK_EQUALS) {
 					scale++;
+					if (scale < 20)
+						scale = 20;
 				} else if (key == KeyEvent.VK_MINUS) {
 					scale--;
 				}

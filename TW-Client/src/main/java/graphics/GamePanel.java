@@ -96,7 +96,6 @@ public class GamePanel extends JPanel {
 	private void addCL(JMenu menu, JMenuItem item, JPanel object) {
 		object.setBounds(ViewPanel.getBounds());
 		object.setPreferredSize(ViewPanel.getSize());
-		object.setBorder(BorderFactory.createEtchedBorder());
 		item.addActionListener(event -> {
 			ViewPanel.removeAll();
 			ViewPanel.add(object);

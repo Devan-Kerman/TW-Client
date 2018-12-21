@@ -44,21 +44,29 @@ public class App {
 
 	}
 
+	public static Chunk[][] getChunks(int cx, int cy) {
+		logger.info("Grabbing new chunks");
+		return request(new Integer[] {0, cx, cy}, Chunk[][].class);
+	}
+	public static int ping() {
+		long start = System.currentTimeMillis();
+		request(new Integer[] {3}, Integer.class);
+		return (int) (System.currentTimeMillis()-start);
+	}
+	
 	public static void setRenderDistance(int render) {
-		k.writeObject(out, 2);
-		out.flush();
-		k.writeObject(out, render);
-		out.flush();
+		int response = request(new Integer[] {2, render}, Integer.class);
+		if(response == 0)
+			logger.info("Render Distance Request Accepted!");
+		else
+			logger.warn("Render Distance Request Rejected!");
 	}
 
-	public static Chunk[][] getChunks(int cx, int cy) {
-		k.writeObject(out, 0);
-		out.flush();
-		k.writeObject(out, cx);
-		out.flush();
-		k.writeObject(out, cy);
-		out.flush();
-		logger.info("Grabbing new chunks");
-		return k.readObject(in, Chunk[][].class);
+	public static synchronized <T> T request(Integer[] input, Class<T> returntype) {
+		for(Integer i : input) {
+			k.writeObject(out, i);
+			out.flush();
+		}
+		return k.readObject(in, returntype);
 	}
 }
