@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Tile implements Serializable {
 	public static final long serialVersionUID = 382610168546865107L;
-	// 19 bytes
+	// 21 bytes
 	public int ownerid;
 
 	public byte elevation; // 'Z' (Elevation)
@@ -22,5 +22,6 @@ public class Tile implements Serializable {
 	public byte wildlife;
 	public byte lumber;
 	public byte humidity;
+	public byte metalicOre;
 
 }
