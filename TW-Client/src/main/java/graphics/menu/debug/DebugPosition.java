@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import graphics.menu.world.WorldView;
-import main.App;
+import main.DLogger;
 import serverclasses.Tile;
 
 public class DebugPosition extends JPanel {
@@ -60,7 +60,7 @@ public class DebugPosition extends JPanel {
 					downloaded.repaint();
 					tiledebug.repaint();
 				} catch(Exception e) {
-					App.logger.warn(e.getMessage());
+					DLogger.warn(e.getMessage());
 					/*Prevent Null Pointers*/
 				}
 			}

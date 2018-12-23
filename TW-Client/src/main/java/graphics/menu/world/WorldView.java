@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 
 import graphics.LongPoint;
 import main.App;
+import main.DLogger;
 import serverclasses.Chunk;
 import serverclasses.Tile;
 
@@ -79,7 +80,7 @@ public class WorldView extends JPanel {
 			scale -= e.getWheelRotation();
 			if (scale < 20)
 				scale = 20;
-			App.logger.info("Scale increased: " + scale);
+			DLogger.info("Scale increased: " + scale);
 		});
 		addKeyListener(new KeyAdapter() {
 			@Override
@@ -140,7 +141,7 @@ public class WorldView extends JPanel {
 		}, 0, 50);
 		setFocusable(true);
 		requestFocusInWindow();
-		App.logger.relief("World View Initialized!");
+		DLogger.relief("World View Initialized!");
 	}
 
 	@Override
@@ -248,7 +249,7 @@ public class WorldView extends JPanel {
 			return new Color(0, 5 + (int) ((temp + 200) * 0.125), 119 + (int) ((temp + 200) * 2.975));
 		else if (temp <= -240)
 			return new Color(0, 0, 0);
-		App.logger.error("Invalid Elevation! " + temp);
+		DLogger.error("Invalid Elevation! " + temp);
 		return Color.BLACK;
 	}
 }

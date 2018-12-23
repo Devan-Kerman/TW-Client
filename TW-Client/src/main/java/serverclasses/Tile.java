@@ -3,25 +3,24 @@ package serverclasses;
 import java.io.Serializable;
 
 public class Tile implements Serializable {
-	public static final long serialVersionUID = 382610168546865107L;
-	// 21 bytes
-	public int ownerid;
 
+	public static final long serialVersionUID = 382610168546865107L;
+	// 24 bytes (16 + 8)
 	public byte elevation; // 'Z' (Elevation)
-	public byte iron_ore;
-	public byte bauxite_ore;
-	public byte tin_ore;
-	public byte copper_ore;
-	public byte gold_ore;
-	public byte silver_ore;
-	public byte coal_ore;
-	public byte platinum_ore;
-	public byte nat_gas;
+	public byte ironOre;
+	public byte bauxiteOre;
+	public byte tinOre;
+	public byte copperOre;
+	public byte goldOre;
+	public byte silverOre;
+	public byte coalOre;
+	public byte platinumOre;
+	public byte natGas;
 	public byte oil;
 	public byte gems;
 	public byte wildlife;
 	public byte lumber;
 	public byte humidity;
 	public byte metalicOre;
-
+	
 }

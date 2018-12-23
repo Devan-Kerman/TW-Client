@@ -64,23 +64,23 @@ public class DLogger {
 		return "#ffffff";
 	}
 
-	public void error(String info) {
+	public static void error(String info) {
 		LOGGER.log(Level.SEVERE, info, Thread.currentThread().getStackTrace()[2]);
 	}
 
-	public void warn(String info) {
+	public static void warn(String info) {
 		LOGGER.log(Level.WARNING, info, Thread.currentThread().getStackTrace()[2]);
 	}
 
-	public void info(String info) {
+	public static void info(String info) {
 		LOGGER.log(Level.INFO, info, Thread.currentThread().getStackTrace()[2]);
 	}
 
-	public void debug(String info) {
+	public static void debug(String info) {
 		LOGGER.log(Level.CONFIG, info, Thread.currentThread().getStackTrace()[2]);
 	}
 
-	public void relief(String info) {
+	public static void relief(String info) {
 		LOGGER.log(Level.FINE, info, Thread.currentThread().getStackTrace()[2]);
 	}
 
