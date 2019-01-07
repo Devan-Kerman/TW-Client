@@ -97,7 +97,7 @@ public class ClientSide {
 
 	public static synchronized <T> T request(Object[] input, Class<T> returntype) {
 		for(Object i : input) {
-			kryo.writeObject(out, i);
+			kryo.writeClassAndObject(out, i);
 			out.flush();
 		}
 		return returntype.cast(kryo.readClassAndObject(in));
@@ -125,7 +125,7 @@ public class ClientSide {
 	
 	public static List<TileUpdate> getUpdates() {
 		List<TileUpdate> updates = new ArrayList<>();
-		kryo.writeObject(out, 1);
+		kryo.writeClassAndObject(out, 1);
 		out.flush();
 		for(int x = 0; x < (Integer)kryo.readClassAndObject(in); x++)
 			updates.add((TileUpdate)kryo.readClassAndObject(in));
