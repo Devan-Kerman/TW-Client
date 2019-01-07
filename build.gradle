@@ -1,0 +1,14 @@
+apply plugin: "java"
+apply plugin: "eclipse"
+apply plugin: "idea"
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation group: 'com.esotericsoftware', name: 'kryo', version: '5.0.0-RC1'
+    implementation 'com.google.guava:guava:23.0'
+    testImplementation 'junit:junit:4.12'
+}
+
