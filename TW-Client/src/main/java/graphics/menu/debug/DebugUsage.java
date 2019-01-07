@@ -18,7 +18,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import main.App;
+import main.ClientSide;
 
 
 public class DebugUsage extends JPanel {
@@ -70,8 +70,8 @@ class UsagePage extends JPanel {
 				cpu.setText(String.format("CPU Usage: %3.3f", osmxb.getSystemLoadAverage()*100));
 				memory.setText(String.format("Memory Usage: %3.3f",(((double)(r.totalMemory() -r.freeMemory()))/r.totalMemory())*100));
 				drive.setText(String.format("Drive Usage:  %3.3f",(((double)f.getUsableSpace())/f.getTotalSpace())*100));
-				network.setText("Network Activity: " + (App.s.isClosed()?"Inactive":"Active"));
-				ping.setText("Ping(ms): " + App.ping());
+				network.setText("Network Activity: " + (ClientSide.s.isClosed()?"Inactive":"Active"));
+				//ping.setText("Ping(ms): " + App.ping());
 			}
 		}, 0, 600);
 		setPreferredSize(new Dimension(300, 400));

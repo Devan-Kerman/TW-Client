@@ -6,20 +6,28 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.swing.JFrame;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-
+import com.esotericsoftware.kryo.serializers.MapSerializer;
 
 import graphics.CFrame;
+import graphics.LoginPanel;
 import serverclasses.Chunk;
 import serverclasses.Improvement;
 import serverclasses.Tile;
 import serverclasses.TileEntity;
+import serverclasses.TilePoint;
+import serverclasses.TileUpdate;
+import serverclasses.improves.WoodCutter;
 
-public class App {
+public class ClientSide {
 	public static Socket s;
 	public static Input in;
 	public static Output out;
@@ -29,8 +37,19 @@ public class App {
 	public static final int CHUNKSIZE = 100;
 	public static CFrame game;
 	public static DLogger logger;
+	public static LoginPanel panel;
+	public static JFrame frame;
+	public static int id;
 
 	public static void main(String[] args) {
+		init();
+		frame = new JFrame ("Login");
+        frame.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add (new LoginPanel());
+        frame.pack();
+        frame.setVisible (true);
+	}
+	public static void init() {
 		logger = new DLogger();
 		try {
 			s = new Socket(ADDRESS, PORT);
@@ -42,33 +61,32 @@ public class App {
 			kryo.register(Tile[].class);
 			kryo.register(Tile[][].class);
 			kryo.register(TileEntity.class);
+			kryo.register(WoodCutter.class);
+			kryo.register(TileUpdate.class);
+			kryo.register(TilePoint.class);
 			kryo.register(Improvement.class);
 			kryo.register(HashMap.class);
 			kryo.register(String.class);
-			for (Class<? extends Improvement> improv : getClasses(App.class.getClassLoader(), "serverclasses/improves"))
+			MapSerializer serializer = new MapSerializer();
+			kryo.register(HashMap.class, serializer);
+			kryo.register(LinkedHashMap.class, serializer);
+			serializer.setKeyClass(String.class, kryo.getSerializer(String.class));
+			serializer.setKeysCanBeNull(false);
+			serializer.setKeyClass(String.class, kryo.getSerializer(String.class));
+			for (Class<? extends Improvement> improv : getClasses(ClientSide.class.getClassLoader(), "serverclasses/improves"))
 				kryo.register(improv);
-			
 			out = new Output(s.getOutputStream());
 			out.flush();
-			
 			in = new Input(s.getInputStream());
-			game = new CFrame("Tile Wars Client 1.0");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public static Chunk[][] getChunks(int cx, int cy) {
 		DLogger.info("Grabbing new chunks");
 		return request(new Integer[] {0, cx, cy}, Chunk[][].class);
 	}
-	public static int ping() {
-		long start = System.currentTimeMillis();
-		request(new Integer[] {3}, Integer.class);
-		return (int) (System.currentTimeMillis()-start);
-	}
-	
 	public static void setRenderDistance(int render) {
 		int response = request(new Integer[] {2, render}, Integer.class);
 		if(response == 0)
@@ -77,13 +95,14 @@ public class App {
 			DLogger.warn("Render Distance Request Rejected!");
 	}
 
-	public static synchronized <T> T request(Integer[] input, Class<T> returntype) {
-		for(Integer i : input) {
+	public static synchronized <T> T request(Object[] input, Class<T> returntype) {
+		for(Object i : input) {
 			kryo.writeObject(out, i);
 			out.flush();
 		}
-		return kryo.readObject(in, returntype);
+		return returntype.cast(kryo.readClassAndObject(in));
 	}
+	
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	public static List<Class<? extends Improvement>> getClasses(ClassLoader cl, String pack) {
 		String dottedPackage = pack.replaceAll("[/]", ".");
@@ -102,5 +121,14 @@ public class App {
 			DLogger.error(e.getMessage());
 		}
 		return classes;
+	}
+	
+	public static List<TileUpdate> getUpdates() {
+		List<TileUpdate> updates = new ArrayList<>();
+		kryo.writeObject(out, 1);
+		out.flush();
+		for(int x = 0; x < (Integer)kryo.readClassAndObject(in); x++)
+			updates.add((TileUpdate)kryo.readClassAndObject(in));
+		return updates;
 	}
 }

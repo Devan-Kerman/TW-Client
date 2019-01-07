@@ -19,13 +19,15 @@ import java.util.TimerTask;
 import javax.swing.JPanel;
 
 import graphics.LongPoint;
-import main.App;
+import main.ClientSide;
 import main.DLogger;
 import serverclasses.Chunk;
 import serverclasses.Tile;
+import serverclasses.TileEntity;
+import serverclasses.TilePoint;
 
 public class WorldView extends JPanel {
-	public static LongPoint tile = new LongPoint(1000, 1000);
+	public static LongPoint tile = new LongPoint(0, 0);
 	public static LongPoint selected = new LongPoint(0, 0);
 
 	private static final long serialVersionUID = 8511667415115269257L;
@@ -58,6 +60,7 @@ public class WorldView extends JPanel {
 				old = p;
 				selected.x = tile.x + p.x / scale;
 				selected.y = tile.y + p.y / scale;
+				
 			}
 
 			public void mouseReleased(MouseEvent e) {
@@ -133,15 +136,26 @@ public class WorldView extends JPanel {
 
 			public void run() {
 				Point faker = getFakeCP();
-				if (faker.x != oldp.x || faker.y != oldp.y) {
+				if (faker.x != oldp.x || faker.y != oldp.y)
 					updateArray();
-					oldp.setLocation(faker);
-				}
+				
+				TilePoint tp = getTilePoint(faker);
+				ClientSide.getUpdates().forEach(action -> {
+					if(action.point.chunk.distance(faker) <= Math.sqrt(2)) {
+						Point diff = getDifference(tp, action.point);
+						System.out.println("gotem");
+						array[diff.x][diff.y] = action.tile;
+					}
+				});
+				oldp.setLocation(faker);
 			}
 		}, 0, 50);
 		setFocusable(true);
 		requestFocusInWindow();
 		DLogger.relief("World View Initialized!");
+	}
+	public Point getDifference(TilePoint a, TilePoint b) {
+		return a.difference(b);
 	}
 
 	@Override
@@ -153,22 +167,26 @@ public class WorldView extends JPanel {
 	public static Point getFakeCP() {
 		Point fp = new Point(0, 0);
 		if (tile.x < 0)
-			fp.x = (int) (tile.x / App.CHUNKSIZE - 1);
+			fp.x = (int) (tile.x / ClientSide.CHUNKSIZE - 1);
 		else
-			fp.x = (int) (tile.x / App.CHUNKSIZE) + 1;
+			fp.x = (int) (tile.x / ClientSide.CHUNKSIZE) + 1;
 		if (tile.y < 0)
-			fp.y = (int) (tile.y / App.CHUNKSIZE - 1);
+			fp.y = (int) (tile.y / ClientSide.CHUNKSIZE - 1);
 		else
-			fp.y = (int) (tile.y / App.CHUNKSIZE) + 1;
+			fp.y = (int) (tile.y / ClientSide.CHUNKSIZE) + 1;
 		return fp;
+	}
+	
+	public static TilePoint getTilePoint(Point fake) {
+		return new TilePoint(fake, (byte)(tile.x%100), (byte)(tile.y%100));
 	}
 
 	Font chunkFont = new Font("Serif", Font.PLAIN, 50);
 	Font tileFont;
 
 	private Point getArrayPoint() {
-		return new Point((int) (tile.x - cx * App.CHUNKSIZE) + App.CHUNKSIZE,
-				(int) (tile.y - cy * App.CHUNKSIZE) + App.CHUNKSIZE);
+		return new Point((int) (tile.x - cx * ClientSide.CHUNKSIZE) + ClientSide.CHUNKSIZE,
+				(int) (tile.y - cy * ClientSide.CHUNKSIZE) + ClientSide.CHUNKSIZE);
 	}
 
 	private void drawImage() {
@@ -181,6 +199,10 @@ public class WorldView extends JPanel {
 			for (int j = 0; j * scale < rect.height && j + a.y < array[0].length && j + a.y > 0; j++) {
 				g2d.setColor(getColor(array[i + a.x][j + a.y].elevation));
 				g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
+				if(array[i + a.x][j+a.y] instanceof TileEntity) {
+					g2d.setColor(new Color(100,100,100,100));
+					g2d.drawRect((int) (i * scale), (int) (j * scale), scale, scale);
+				}
 				if (selected.x == i + tile.x && selected.y == j + tile.y) {
 					g2d.setColor(new Color(255, 100, 100, 100));
 					g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
@@ -201,10 +223,10 @@ public class WorldView extends JPanel {
 	}
 
 	private static void updateArray() {
-		App.setRenderDistance(renderdistance);
+		ClientSide.setRenderDistance(renderdistance);
 		Point fp = getFakeCP();
-		Chunk[][] cs = App.getChunks(fp.x, fp.y);
-		Tile[][] array2 = new Tile[App.CHUNKSIZE * cs.length][App.CHUNKSIZE * cs[0].length];
+		Chunk[][] cs = ClientSide.getChunks(fp.x, fp.y);
+		Tile[][] array2 = new Tile[ClientSide.CHUNKSIZE * cs.length][ClientSide.CHUNKSIZE * cs[0].length];
 		for (int x = 0; x < cs.length; x++)
 			for (int y = 0; y < cs.length; y++)
 				oneArray(array2, cs[x][y].data, x * 100, y * 100);

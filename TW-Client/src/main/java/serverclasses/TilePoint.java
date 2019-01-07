@@ -2,6 +2,8 @@ package serverclasses;
 
 import java.awt.Point;
 
+import graphics.LongPoint;
+
 public class TilePoint {
 	public Point chunk;
 	public byte tx;
@@ -45,6 +47,18 @@ public class TilePoint {
 	@Override
 	public String toString() {
 		return String.format("[%d, %d] -> [%d, %d]", chunk.x, chunk.y, tx, ty);
+	}
+	
+	public LongPoint getAbs() {
+		return new LongPoint(chunk.x*100L+tx, chunk.y*100L+ty);
+	}
+	
+	public Point difference(LongPoint p) {
+		return getAbs().difference(p);
+	}
+	
+	public Point difference(TilePoint p) {
+		return getAbs().difference(p.getAbs());
 	}
 
 }

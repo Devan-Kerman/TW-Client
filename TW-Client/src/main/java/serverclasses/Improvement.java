@@ -51,12 +51,12 @@ public abstract class Improvement implements Serializable {
 	public abstract void upgrade(Nation n);
 
 	/**
-	 * For serverside only
+	 * 
 	 */
 	public abstract ItemStack[] upgradeCost();
 
 	/**
-	 * For serverside only
+	 * 
 	 */
 	public abstract int getTier();
 	

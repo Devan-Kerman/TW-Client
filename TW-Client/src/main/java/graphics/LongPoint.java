@@ -1,5 +1,7 @@
 package graphics;
 
+import java.awt.Point;
+
 public class LongPoint {
 
 	public long x;
@@ -12,6 +14,11 @@ public class LongPoint {
 
 	public String toString() {
 		return String.format("[%d, %d]", x, y);
+	}
+	
+	public Point difference(LongPoint p) {
+		return new Point((int)(p.x-x), (int)(p.y-y));
+		
 	}
 
 }

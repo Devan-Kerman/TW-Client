@@ -10,7 +10,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 
-import main.App;
+import main.ClientSide;
 import main.DLogger;
 
 public class DebugLog extends JPanel {
@@ -36,7 +36,7 @@ public class DebugLog extends JPanel {
 		t.schedule(new TimerTask() {
 			public void run() {
 				dlm.clear();
-				App.logger.log.forEach(dlm::addElement);
+				ClientSide.logger.log.forEach(dlm::addElement);
 			}
 		}, 0, 100);
 

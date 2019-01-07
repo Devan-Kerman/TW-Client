@@ -56,4 +56,5 @@ public class WoodCutter extends Improvement {
 	public boolean canRun(Nation owner) {
 		return owner.getInventory().hasEnough(Resource.FOOD, tile.getData("population"));
 	}
+
 }
