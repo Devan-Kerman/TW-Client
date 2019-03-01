@@ -19,12 +19,11 @@ import java.util.TimerTask;
 import javax.swing.JPanel;
 
 import graphics.LongPoint;
-import main.Clientside;
+import graphics.utils.Chunks;
 import main.DLogger;
-import serverclasses.Chunk;
-import serverclasses.Tile;
-import serverclasses.TileEntity;
-import serverclasses.TilePoint;
+import server.nation.TilePoint;
+import server.world.chunk.Chunk;
+import server.world.tile.Tile;
 
 public class WorldView extends JPanel {
 	public static LongPoint tile = new LongPoint(0, 0);
@@ -33,7 +32,7 @@ public class WorldView extends JPanel {
 	private static final long serialVersionUID = 8511667415115269257L;
 	BufferedImage img;
 	int scale = 50;
-	static Tile[][] array;
+	static Chunks chunks = new Chunks();
 	Point old;
 	public static int renderdistance = 1;
 
@@ -60,7 +59,7 @@ public class WorldView extends JPanel {
 				old = p;
 				selected.x = tile.x + p.x / scale;
 				selected.y = tile.y + p.y / scale;
-				
+
 			}
 
 			public void mouseReleased(MouseEvent e) {
@@ -138,15 +137,16 @@ public class WorldView extends JPanel {
 				Point faker = getFakeCP();
 				if (faker.x != oldp.x || faker.y != oldp.y)
 					updateArray();
-				
-				TilePoint tp = getTilePoint(faker);
+
+				/*TilePoint tp = getTilePoint(faker);
 				Clientside.getUpdates().forEach(action -> {
-					if(action.point.chunk.distance(faker) <= Math.sqrt(2)) {
+					if (action.point.chunk.distance(faker) <= Math.sqrt(2)) {
 						Point diff = getDifference(tp, action.point);
 						System.out.println("gotem");
 						array[diff.x][diff.y] = action.tile;
 					}
-				});
+				});*/
+				
 				oldp.setLocation(faker);
 			}
 		}, 0, 50);
@@ -154,8 +154,9 @@ public class WorldView extends JPanel {
 		requestFocusInWindow();
 		DLogger.relief("World View Initialized!");
 	}
+
 	public Point getDifference(TilePoint a, TilePoint b) {
-		return a.difference(b);
+		return TilePoint.diff(a, b);
 	}
 
 	@Override
@@ -167,26 +168,26 @@ public class WorldView extends JPanel {
 	public static Point getFakeCP() {
 		Point fp = new Point(0, 0);
 		if (tile.x < 0)
-			fp.x = (int) (tile.x / Clientside.CHUNKSIZE - 1);
+			fp.x = (int) (tile.x / Chunk.CHUNKSIZE - 1);
 		else
-			fp.x = (int) (tile.x / Clientside.CHUNKSIZE) + 1;
+			fp.x = (int) (tile.x / Chunk.CHUNKSIZE) + 1;
 		if (tile.y < 0)
-			fp.y = (int) (tile.y / Clientside.CHUNKSIZE - 1);
+			fp.y = (int) (tile.y / Chunk.CHUNKSIZE - 1);
 		else
-			fp.y = (int) (tile.y / Clientside.CHUNKSIZE) + 1;
+			fp.y = (int) (tile.y / Chunk.CHUNKSIZE) + 1;
 		return fp;
 	}
-	
+
 	public static TilePoint getTilePoint(Point fake) {
-		return new TilePoint(fake, (byte)(tile.x%100), (byte)(tile.y%100));
+		return new TilePoint(fake, (byte) (tile.x % 100), (byte) (tile.y % 100));
 	}
 
 	Font chunkFont = new Font("Serif", Font.PLAIN, 50);
 	Font tileFont;
 
 	private Point getArrayPoint() {
-		return new Point((int) (tile.x - cx * Clientside.CHUNKSIZE) + Clientside.CHUNKSIZE,
-				(int) (tile.y - cy * Clientside.CHUNKSIZE) + Clientside.CHUNKSIZE);
+		return new Point((int) (tile.x - cx * Chunk.CHUNKSIZE) + Chunk.CHUNKSIZE,
+				(int) (tile.y - cy * Chunk.CHUNKSIZE) + Chunk.CHUNKSIZE);
 	}
 
 	private void drawImage() {
@@ -195,18 +196,15 @@ public class WorldView extends JPanel {
 		Rectangle rect = this.getBounds();
 		BufferedImage img2 = new BufferedImage(rect.width + 1, rect.height + 1, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = img2.createGraphics();
-		for (int i = 0; i * scale < rect.width && i + a.x < array.length && i + a.x > 0; i++)
-			for (int j = 0; j * scale < rect.height && j + a.y < array[0].length && j + a.y > 0; j++) {
-				g2d.setColor(getColor(array[i + a.x][j + a.y].elevation));
+		for (int i = 0; i * scale < rect.width && i + a.x < chunks.len() && i + a.x > 0; i++)
+			for (int j = 0; j * scale < rect.height && j + a.y < chunks.len() && j + a.y > 0; j++) {
+				g2d.setColor(getColor(chunks.get(i + a.x, j + a.y).elevation));
 				g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
-				if(array[i + a.x][j+a.y] instanceof TileEntity) {
-					g2d.setColor(new Color(100,100,100,100));
-					g2d.drawRect((int) (i * scale), (int) (j * scale), scale, scale);
-				}
 				if (selected.x == i + tile.x && selected.y == j + tile.y) {
 					g2d.setColor(new Color(255, 100, 100, 100));
 					g2d.fillRect((int) (i * scale), (int) (j * scale), scale, scale);
 				}
+
 			}
 		g2d.setFont(chunkFont);
 		g2d.setColor(Color.black);
@@ -216,30 +214,19 @@ public class WorldView extends JPanel {
 
 	public static Tile getSelected() {
 		try {
-			return array[(int) (selected.x - tile.x)][(int) (selected.y - tile.y)];
+			return chunks.get((int) (selected.x - tile.x), (int) (selected.y - tile.y));
 		} catch (Exception e) {
 			return new Tile();
 		}
 	}
 
 	private static void updateArray() {
-		Clientside.setRenderDistance(renderdistance);
 		Point fp = getFakeCP();
-		Chunk[][] cs = Clientside.getChunks(fp.x, fp.y);
+		chunks.update(fp.x, fp.y);
 		DLogger.info("Grabbed chunks");
-		Tile[][] array2 = new Tile[Clientside.CHUNKSIZE * cs.length][Clientside.CHUNKSIZE * cs[0].length];
-		for (int x = 0; x < cs.length; x++)
-			for (int y = 0; y < cs.length; y++)
-				oneArray(array2, cs[x][y].data, x * 100, y * 100);
-		cx = cs[0][0].x;
-		cy = cs[0][0].y;
-		array = array2;
-	}
-
-	private static void oneArray(Tile[][] array2, Tile[][] c, int sx, int sy) {
-		for (int x = 0; x < c.length; x++)
-			for (int y = 0; y < c[0].length; y++)
-				array2[x + sx][y + sy] = c[x][y];
+		cx = chunks.getCH(0, 0).cx;
+		cy = chunks.getCH(0, 0).cy;
+		
 	}
 
 	private Color getColor(int temp) {

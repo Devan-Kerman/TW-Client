@@ -18,8 +18,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import main.Clientside;
-
 
 public class DebugUsage extends JPanel {
 	private static final long serialVersionUID = 8511667415115269257L;
@@ -70,7 +68,7 @@ class UsagePage extends JPanel {
 				cpu.setText(String.format("CPU Usage: %3.3f", osmxb.getSystemLoadAverage()*100));
 				memory.setText(String.format("Memory Usage: %3.3f",(((double)(r.totalMemory() -r.freeMemory()))/r.totalMemory())*100));
 				drive.setText(String.format("Drive Usage:  %3.3f",(((double)f.getUsableSpace())/f.getTotalSpace())*100));
-				network.setText("Network Activity: " + (Clientside.s.isClosed()?"Inactive":"Active"));
+				//network.setText("Network Activity: " + (Clientside..isClosed()?"Inactive":"Active"));
 				//ping.setText("Ping(ms): " + App.ping());
 			}
 		}, 0, 600);

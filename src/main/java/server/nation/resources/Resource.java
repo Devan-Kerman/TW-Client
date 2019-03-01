@@ -1,6 +1,7 @@
-package serverclasses;
+package server.nation.resources;
+
 /**
- * Contains all the enums of the resources a player can have
+ * Contains all the enums of the resources a player/nation can have
  * @author devan
  *
  */
@@ -11,7 +12,7 @@ public enum Resource {
 	ALUMINUM(9), STEEL(10), TUNGSTEN(11),
 	GOLD(12), SILVER(13), LEAD(14), MERCURY(15),
 	PLATINUM(16), COBALT(17), FOOD(18);
-	private short id;
-	private Resource(int id) {this.id = (short) id;}
+	private final short id;
+	Resource(int id) {this.id = (short) id;}
 	public short getID() {return id;}
 }

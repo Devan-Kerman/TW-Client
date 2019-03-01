@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 public class DLogger {
 
 	private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	public List<String> errors;
-	public List<String> log;
+	public static List<String> errors;
+	public static List<String> log;
 
-	public DLogger() {
+	static {
 		errors = new ArrayList<>();
 		log = new ArrayList<>();
 		LOGGER.setLevel(Level.FINEST);
@@ -46,7 +46,7 @@ public class DLogger {
 	 * Error = #ff0000 Warn = #ff6600 Info = #ffffff Debug = #33ccff Relief =
 	 * #99ff66
 	 */
-	private String levelHex(Level l) {
+	private static String levelHex(Level l) {
 		if (l.intValue() == Level.SEVERE.intValue())
 			return "#ff0000";
 		else if (l.intValue() == Level.WARNING.intValue())

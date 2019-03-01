@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 
 import graphics.menu.world.WorldView;
 import main.DLogger;
-import serverclasses.Tile;
+import server.world.tile.Tile;
 
 public class DebugPosition extends JPanel {
 	private static final long serialVersionUID = 8511667415115269257L;

@@ -1,132 +1,71 @@
 package main;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.net.Socket;
-import java.net.URL;
-import java.util.*;
+import java.awt.Point;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Future;
 
 import javax.swing.JFrame;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.MapSerializer;
-
 import graphics.CFrame;
-import graphics.LoginPanel;
-import serverclasses.Chunk;
-import serverclasses.Improvement;
-import serverclasses.Tile;
-import serverclasses.TileEntity;
-import serverclasses.TilePoint;
-import serverclasses.TileUpdate;
-import serverclasses.improves.WoodCutter;
+import graphics.FirstPanel;
+import networking.Connection;
+import server.api.bytes.ByteReader;
+import server.api.bytes.Packer;
+import server.util.math.Bytes;
+import server.world.chunk.Chunk;
 
 public class Clientside {
-	public static Socket s;
-	public static Input in;
-	public static Output out;
-	public static Kryo kryo;
-	public static final String ADDRESS = "localhost";
-	public static final int PORT = 6702;
-	public static final int CHUNKSIZE = 100;
 	public static CFrame game;
-	public static DLogger logger;
-	public static LoginPanel panel;
-	public static JFrame frame;
+	public static FirstPanel panel;
+	public static JFrame login;
 	public static int id;
+	private static Connection connection;
 
 	public static void main(String[] args) {
-		init();
-//		DLogger.info(String.valueOf(request(new Object[] {4, "A"}, Integer.class)));
-		frame = new JFrame ("Login");
-        frame.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add (new LoginPanel());
-        frame.pack();
-        frame.setVisible (true);
-	}
-	public static void init() {
-		logger = new DLogger();
-		try {
-			s = new Socket(ADDRESS, PORT);
-			kryo = new Kryo();
-			kryo.register(Chunk[][].class);
-			kryo.register(Chunk[].class);
-			kryo.register(Chunk.class);
-			kryo.register(Tile.class);
-			kryo.register(Tile[].class);
-			kryo.register(Tile[][].class);
-			kryo.register(TileEntity.class);
-			kryo.register(WoodCutter.class);
-			kryo.register(TileUpdate.class);
-			kryo.register(TilePoint.class);
-			kryo.register(Improvement.class);
-			kryo.register(HashMap.class);
-			kryo.register(String.class);
-			MapSerializer serializer = new MapSerializer();
-			kryo.register(HashMap.class, serializer);
-			kryo.register(LinkedHashMap.class, serializer);
-			serializer.setKeyClass(String.class, kryo.getSerializer(String.class));
-			serializer.setKeysCanBeNull(false);
-			serializer.setKeyClass(String.class, kryo.getSerializer(String.class));
-			for (Class<? extends Improvement> improv : getClasses(Clientside.class.getClassLoader(), "serverclasses/improves"))
-				kryo.register(improv);
-			out = new Output(s.getOutputStream());
-			out.flush();
-			in = new Input(s.getInputStream());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static Chunk[][] getChunks(int cx, int cy) {
-		DLogger.info("Grabbing new chunks");
-		return request(new Integer[] {0, cx, cy}, Chunk[][].class);
-	}
-	public static void setRenderDistance(int render) {
-		int response = request(new Integer[] {2, render}, Integer.class);
-		if(response == 0)
-			DLogger.info("Render Distance Request Accepted!");
-		else
-			DLogger.warn("Render Distance Request Rejected!");
-	}
-
-	public static synchronized <T> T request(Object[] input, Class<T> returntype) {
-		DLogger.info("Requst: " + Arrays.toString(input));
-		for(Object i : input) {
-			kryo.writeObject(out, i);
-			out.flush();
-		}
-		return kryo.readObject(in, returntype);
+		connection = new Connection();
+		connection.open("localhost", 3456);
+		connection.queue(0, new byte[] {1});
+		login = new JFrame("Login");
+		login.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		login.getContentPane().add(new FirstPanel());
+		login.pack();
+		login.setVisible(true);
 	}
 	
-	@SuppressWarnings({ "unchecked", "deprecation" })
-	public static List<Class<? extends Improvement>> getClasses(ClassLoader cl, String pack) {
-		String dottedPackage = pack.replaceAll("[/]", ".");
-		List<Class<? extends Improvement>> classes = new ArrayList<>();
-		try {
-			URL upackage = cl.getResource(pack);
-			DataInputStream dis = new DataInputStream((InputStream) upackage.getContent());
-			String line = null;
-			while ((line = dis.readLine()) != null) {
-				if (line.endsWith(".class")) {
-					classes.add((Class<? extends Improvement>) Class
-							.forName(dottedPackage + "." + line.substring(0, line.lastIndexOf('.'))));
-				}
-			}
-		} catch (Exception e) {
-			DLogger.error(e.getMessage());
-		}
-		return classes;
+	static class CF {
+		Future<Chunk> f;
 	}
 	
-	public static List<TileUpdate> getUpdates() {
-		List<TileUpdate> updates = new ArrayList<>();
-		kryo.writeObject(out, 1);
-		out.flush();
-		for(int x = 0; x < kryo.readObject(in, Integer.class); x++)
-			updates.add(kryo.readObject(in, TileUpdate.class));
-		return updates;
+	public static Chunk getChunk(int x, int y) {
+		Packer p = new Packer();
+		p.packPoint(new Point(x, y));
+		ByteReader reader = new ByteReader(connection.queue(2, p.unpack()));
+		return reader.read(Chunk.class);
 	}
+	
+	public static int login(String user, String pass) {
+		Packer p = new Packer();
+		p.packString(user, StandardCharsets.US_ASCII);
+		p.packString(pass, StandardCharsets.US_ASCII);
+		return Bytes.toInt(connection.queue(3, p.unpack()));
+	}
+	
+	public static int register(String user, String pass) {
+		Packer p = new Packer();
+		p.packString(user, StandardCharsets.US_ASCII);
+		p.packString(pass, StandardCharsets.US_ASCII);
+		return Bytes.toInt(connection.queue(1, p.unpack()));
+	}
+	
+	public static Chunk[][] getChunks(int x, int y) {
+		x--;
+		y--;
+		Chunk[][] arr = new Chunk[3][3];
+		for(int c = 0; c < 3; c++)
+			for(int r = 0; r < 3; r++)
+				arr[c][r] = getChunk(x+c, y+r);
+		return arr;
+	}
+	
+	//public static List<TileUpdates> getUpdates();
 }

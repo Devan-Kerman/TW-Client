@@ -10,10 +10,8 @@ import javax.swing.JTextArea;
 
 import main.Clientside;
 import main.DLogger;
-import serverclasses.Improvement;
-import serverclasses.ItemStack;
-import serverclasses.Tile;
-import serverclasses.TileEntity;
+import server.world.tile.Tile;
+import server.world.tile.TileEntity;
 
 public class TileFrame extends JFrame {
 	private static final long serialVersionUID = 4759145034977326766L;
@@ -71,67 +69,45 @@ public class TileFrame extends JFrame {
 		if(te==null)
 			ifNotTileEntity();
 	}
-	public TileFrame(Tile tin) {
+	public TileFrame(Tile tin, TileEntity ent) {
 		this.t = tin;
-		if (t instanceof TileEntity)
-			this.te = (TileEntity) t;
-		else
-			te = null;
+		te = ent;
 		// construct preComponents
-		String[] statslistItems = new String[18];
+		String[] statslistItems = new String[17];
 		int ar = 0;
 		statslistItems[ar++] = "Owner ID: "+t.ownerid;
 		statslistItems[ar++] = "Elevation: " + t.elevation;
-		statslistItems[ar++] = "Iron Ore: " + t.ironOre;
-		statslistItems[ar++] = "Bauxite Ore: " + t.bauxiteOre;
-		statslistItems[ar++] = "Tin Ore: " + t.tinOre;
-		statslistItems[ar++] = "Copper Ore: " + t.copperOre;
-		statslistItems[ar++] = "Gold Ore: " + t.goldOre;
-		statslistItems[ar++] = "Silver Ore: " + t.silverOre;
-		statslistItems[ar++] = "Coal Ore: " + t.coalOre;
-		statslistItems[ar++] = "Platinum Ore: " + t.platinumOre;
-		statslistItems[ar++] = "Natural Gas: " + t.natGas;
+		statslistItems[ar++] = "Iron Ore: " + t.ironlike;
+		statslistItems[ar++] = "Bauxite Ore: " + t.bauxite;
+		statslistItems[ar++] = "Tin Ore: " + t.tinlike;
+		statslistItems[ar++] = "Copper Ore: " + t.copperlike;
+		statslistItems[ar++] = "Gold Ore: " + t.copperlike*.1;
+		statslistItems[ar++] = "Silver Ore: " + t.tinlike;
+		statslistItems[ar++] = "Coal Ore: " + t.coal;
+		statslistItems[ar++] = "Platinum Ore: " + t.tinlike*.1;
+		statslistItems[ar++] = "Natural Gas: " + t.oil*.5;
 		statslistItems[ar++] = "Oil: " + t.oil;
-		statslistItems[ar++] = "Gems: " + t.gems;
+		statslistItems[ar++] = "Gems: " + t.tinlike*.5;
 		statslistItems[ar++] = "Wild Life: " + t.wildlife;
 		statslistItems[ar++] = "Lumber: " + t.lumber;
-		statslistItems[ar++] = "Humidity: " + t.humidity;
-		statslistItems[ar++] = "Metalic Ore: " + t.metalicOre;
-		String[] consumeListItems = new String[0];
-		String[] upgradelistItems = new String[0];
-		String[] prodlistItems = new String[0];
-		String[] counterlistItems = new String[0];
-		String[] defensiveItems = new String[0];
-		if (t instanceof TileEntity) {
-			Improvement i = te.i;
-			if (i != null) {
-				consumeListItems = new String[] {"NOT YET SUPPORTED"};
-				upgradelistItems = new String[i.upgradeCost().length];
-				int counter = 0;
-				for(ItemStack istack : i.upgradeCost())
-					upgradelistItems[counter++] = istack.r.name() + ": " + istack.amount;
-				prodlistItems = new String[] {"NOT YET SUPPORTED"};
-				counterlistItems = new String[] {"Air score: "+te.getData("ScoreAir"), "Ground score: "+te.getData("ScoreGround"), "Sea score: "+te.getData("ScoreSea")};
-				defensiveItems = new String[] {"Defensive Air score: "+te.getData("DefScoreAir"), "Defensive Ground score: "+te.getData("DefScoreGround"), "Defensive Sea score: "+te.getData("DefScoreSea")};
-			}
-		}
+		statslistItems[ar++] = "Wildlife: " + t.wildlife;
 		// construct components
 		statslist = new JList<>(statslistItems);
 		demolishbutt = new JButton("Demolish ");
 		buildbutt = new JButton("Build");
-		if(te!=null && te.i!=null) {
-			improvelab = new JLabel("Improvement: " + te.i.getClass().getSimpleName());
-			tierlab = new JLabel("Tier:" + te.i.getTier());
+		if(te!=null) {
+			improvelab = new JLabel("Improvement: " + te.getClass().getSimpleName());
+			tierlab = new JLabel("Tier: null");
 		} else {
 			improvelab = new JLabel("Improvement: null");
 			tierlab = new JLabel("Tier: null");
 		}
 		RSSLab = new JLabel("Resource consumption");
-		consumeList = new JList<>(consumeListItems);
+		//consumeList = new JList<>(consumeListItems);
 		upgradelab = new JLabel("Upgrade resources");
-		upgradelist = new JList<>(upgradelistItems);
+		//upgradelist = new JList<>(upgradelistItems);
 		prodlab = new JLabel("Resource production");
-		prodlist = new JList<>(prodlistItems);
+		//prodlist = new JList<>(prodlistItems);
 		upgradebutt = new JButton("Upgrade");
 		claimbutt = new JButton("Claim");
 		extraInfo = new JTextArea(5, 5);
@@ -139,8 +115,8 @@ public class TileFrame extends JFrame {
 		pausebutt = new JButton("Pause");
 		unpausebutt = new JButton("Unpause");
 		capitalbutt = new JButton("Capital");
-		counterlist = new JList<>(counterlistItems);
-		defensive = new JList<>(defensiveItems);
+		//counterlist = new JList<>(counterlistItems);
+		//defensive = new JList<>(defensiveItems);
 
 		// adjust size and set layout
 		setPreferredSize(new Dimension(1000, 500));
