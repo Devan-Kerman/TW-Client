@@ -1,7 +1,6 @@
 package graphics.menu.debug;
 
 import java.awt.Font;
-import java.awt.Point;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,9 +8,9 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import graphics.menu.world.WorldView;
+import graphics.menu.world.view.WorldView;
 import main.DLogger;
-import server.world.tile.Tile;
+import server.world.chunk.ChunkManager;
 
 public class DebugPosition extends JPanel {
 	private static final long serialVersionUID = 8511667415115269257L;
@@ -42,17 +41,14 @@ public class DebugPosition extends JPanel {
 
 		Timer t = new Timer();
 		t.schedule(new TimerTask() {
-			Point p = new Point(0, 0);
 			@Override
 			public void run() {
 				try {
-					selected.setText(String.format("Selected Position: %s", WorldView.selected));
-					p.setLocation(WorldView.getFakeCP());
-					chunk.setText(String.format("Draw Chunk Position: [%d, %d]", p.x, p.y));
-					tile.setText(String.format("Tile Position: %s", WorldView.tile));
-					downloaded.setText(String.format("Downloaded Chunk Position: [%d, %d]", WorldView.cx, WorldView.cy));
-					Tile t = WorldView.getSelected();
-					tiledebug.setText(String.format("Elevation: %d", t.elevation));
+					selected.setText(String.format("Selected Position: [%d, %d]", WorldView.sx, WorldView.sy));
+					chunk.setText(String.format("Chunk Position: [%d, %d]", Math.floorDiv(WorldView.tx, 100l), Math.floorDiv(WorldView.ty, 100l)));
+					tile.setText(String.format("Tile Position: [%d, %d]", WorldView.tx, WorldView.ty));
+					downloaded.setText(String.format("Cached chunks: %d", ChunkManager.size()));
+					tiledebug.setText(String.format("null: %d", 0));
 					
 					selected.repaint();
 					chunk.repaint();

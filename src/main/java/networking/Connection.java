@@ -7,6 +7,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import main.DLogger;
+import server.api.bytes.Packer;
 import server.util.math.Bytes;
 
 public class Connection {
@@ -56,11 +57,12 @@ public class Connection {
 			if (len != 4)
 				throw new IOException("Packet length was corrupted!");
 			int reed = Bytes.toInt(int_alloc);
-			byte[] alloc = new byte[reed];
-			int res = in.read(alloc);
-			DLogger.debug("Missed: " + (reed-res));
+			Packer p = new Packer();
+			DLogger.warn("Reading...");
+			p.read(in, reed);
+			DLogger.relief("Read!");
 			locked.set(false);
-			return alloc;
+			return p.unpack();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -13,6 +13,8 @@ import server.api.bytes.Packetable;
  */
 public class Tile implements Packetable, Assembable {
 	
+	public static final Tile NULL = new Tile();
+	
 	/**
 	 * Number of bytes this object takes to serialize
 	 */

@@ -49,7 +49,7 @@ public class FirstPanel extends JPanel {
 		logbutt.addActionListener(l -> {
 			String user = userin.getText();
 			String pass = new String(passin.getPassword());
-			int resp = Clientside.register(user, pass);
+			int resp = Clientside.login(user, pass);
 			if(resp == 0) {
 				JOptionPane.showMessageDialog(null, "Invalid login!");
 			} else {

@@ -15,7 +15,12 @@ public class Chunk implements Packetable, Assembable {
 	 * The dimensions of the chunk (size x size)
 	 */
 	public static final int CHUNKSIZE = 100;
-
+	public static final Chunk NULL = new Chunk();
+	static {
+		for(int x = 0; x < NULL.tiles.length; x++)
+			for(int y = 0; y < NULL.tiles[x].length; y++)
+				NULL.tiles[x][y] = Tile.NULL;
+	}
 	public final Tile[][] tiles;
 
 	public SpaceMap<TileEntity> tileEnts;

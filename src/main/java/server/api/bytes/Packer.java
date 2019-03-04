@@ -2,6 +2,8 @@ package server.api.bytes;
 
 import java.awt.Point;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -24,15 +26,35 @@ public class Packer implements Packetable, Assembable {
 	int last;
 	int allocated;
 	
+	/**
+	 * Simply fills the array with 0 and resets the position counter
+	 */
+	public void reset() {
+		Arrays.fill(arr, ((byte)0));
+		last = 0;
+		allocated = arr.length;
+	}
+	
+	/**
+	 * Oposite of allocate
+	 */
+	public int trim() {
+		byte[] newar = new byte[last];
+		System.arraycopy(arr, 0, newar, 0, newar.length);
+		int pre = allocated;
+		allocated = 0;
+		return pre;
+	}
+
 	public void allocate(int bytes) {
 		this.allocated += bytes;
-		byte[] all = new byte[arr.length+bytes];
+		byte[] all = new byte[arr.length + bytes];
 		System.arraycopy(arr, 0, all, 0, arr.length);
 		arr = all;
 	}
-	
+
 	public void packAll(byte[] c) {
-		if(allocated >= c.length) {
+		if (allocated >= c.length) {
 			System.arraycopy(c, 0, arr, last, c.length);
 			allocated -= c.length;
 			last += c.length;
@@ -42,17 +64,31 @@ public class Packer implements Packetable, Assembable {
 		byte[] ner = new byte[arr.length + c.length];
 		System.arraycopy(arr, 0, ner, 0, arr.length);
 		System.arraycopy(c, 0, ner, last, c.length);
-		last+=c.length;
+		last += c.length;
 		arr = ner;
 	}
-	
+
+	public void read(InputStream stream, int len) {
+		allocate(len);
+		byte[] alloc = new byte[len];
+		int rem = len;
+		while(rem > 0) {
+			try {
+				rem -= stream.read(alloc, len-rem, rem);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		packAll(alloc);
+	}
+
 	public void pack(byte b) {
-		if(allocated > 0) {
+		if (allocated > 0) {
 			allocated--;
 			arr[last++] = b;
 			return;
 		}
-		byte[] ner = new byte[arr.length+1];
+		byte[] ner = new byte[arr.length + 1];
 		System.arraycopy(arr, 0, ner, 0, arr.length);
 		ner[arr.length] = b;
 		arr = ner;
@@ -65,14 +101,19 @@ public class Packer implements Packetable, Assembable {
 		pack.packAll(Bytes.fromInt(arr.length));
 		pack.packAll(arr);
 	}
-	
+
 	@Override
 	public void from(ByteReader reader) {
 		packAll(reader.read(reader.readInt()));
 	}
-	
+
 	public Packer() {
 		arr = new byte[0];
+	}
+	
+	public Packer(int alloc) {
+		arr = new byte[alloc];
+		allocated = alloc;
 	}
 
 	public int size() {
@@ -82,7 +123,7 @@ public class Packer implements Packetable, Assembable {
 	public boolean isEmpty() {
 		return arr == null;
 	}
-	
+
 	public void packObj(Object o) {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(baos));
@@ -93,11 +134,11 @@ public class Packer implements Packetable, Assembable {
 			byte[] ba = baos.toByteArray();
 			packInt(ba.length);
 			packAll(ba);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void packString(String strn, Charset charset) {
 		byte[] to = strn.getBytes(charset);
 		packInt(to.length);
@@ -107,39 +148,40 @@ public class Packer implements Packetable, Assembable {
 	public void packInt(int i) {
 		packAll(Bytes.fromInt(i));
 	}
-	
+
 	public void packPoint(Point p) {
 		packAll(Bytes.fromPoint(p));
 	}
-	
+
 	public void packShort(short s) {
 		packAll(Bytes.fromShort(s));
 	}
-	
+
 	public void packDouble(double d) {
 		packAll(Bytes.fromDouble(d));
 	}
-	
+
 	public void packFloat(float f) {
 		packAll(Bytes.fromFloat(f));
 	}
-	
+
 	public <T extends Packetable> void packList(List<T> l) {
 		Bytes.fromList(l, this);
 	}
-	
+
 	public <K extends Packetable, V extends Packetable> void packMap(Map<K, V> map) {
 		Bytes.fromMap(map, this);
 	}
-	public void autoPack(Packetable...packets) {
-		for(Packetable p : packets)
+
+	public void autoPack(Packetable... packets) {
+		for (Packetable p : packets)
 			p.pack(this);
 	}
-	
-	public void packV(byte...vars) {
+
+	public void packV(byte... vars) {
 		packAll(vars);
 	}
-	
+
 	public void clear() {
 		arr = new byte[0];
 	}
@@ -150,7 +192,7 @@ public class Packer implements Packetable, Assembable {
 
 	public byte set(int index, byte element) {
 		byte retur = 0;
-		if(arr[index] == 0)
+		if (arr[index] == 0)
 			arr[index] = element;
 		else {
 			arr[index] = element;
@@ -158,23 +200,22 @@ public class Packer implements Packetable, Assembable {
 		}
 		return retur;
 	}
-	
+
 	@Override
 	public String toString() {
 		return Arrays.toString(arr);
 	}
-	
+
 	public ByteReader getReader() {
 		return new ByteReader(arr);
 	}
-	
+
 	public byte[] unpack() {
 		return arr;
 	}
-	
+
 	public byte[] cpyUnpack() {
 		return Arrays.copyOf(arr, arr.length);
 	}
-	
 
 }

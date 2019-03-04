@@ -22,7 +22,7 @@ import graphics.menu.server.ServerUsage;
 import graphics.menu.world.WorldMonitor;
 import graphics.menu.world.WorldRanks;
 import graphics.menu.world.WorldStats;
-import graphics.menu.world.WorldView;
+import graphics.menu.world.view.WorldView;
 
 public class GamePanel extends JPanel {
 
@@ -67,6 +67,7 @@ public class GamePanel extends JPanel {
 		addCL(worldMenu, new JMenuItem("Stats"), stats2);
 		WorldRanks ranks = new WorldRanks();
 		addCL(worldMenu, new JMenuItem("Ranks"), ranks);
+		//WorldView view2 = new WorldView();
 		WorldView view2 = new WorldView();
 		addCL(worldMenu, new JMenuItem("View"), view2);
 
