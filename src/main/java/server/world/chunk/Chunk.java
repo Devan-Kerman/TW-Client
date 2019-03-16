@@ -1,6 +1,6 @@
 package server.world.chunk;
 
-import server.api.area.BPoint;
+import server.api.area.LocalPoint;
 import server.api.area.SpaceMap;
 import server.api.bytes.Assembable;
 import server.api.bytes.ByteReader;
@@ -75,7 +75,7 @@ public class Chunk implements Packetable, Assembable {
 		return tiles[x][y];
 	}
 	
-	public Tile get(BPoint b) {
+	public Tile get(LocalPoint b) {
 		return tiles[b.x][b.y];
 	}
 }

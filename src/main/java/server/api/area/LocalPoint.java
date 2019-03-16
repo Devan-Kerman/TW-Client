@@ -10,14 +10,14 @@ import server.api.bytes.Packetable;
  * @author devan
  *
  */
-public class BPoint implements Assembable, Packetable{
+public class LocalPoint implements Assembable, Packetable{
 	public byte x, y;
-	public BPoint(byte x, byte y) {
+	public LocalPoint(byte x, byte y) {
 		this.x = x;
 		this.y = y;
 	}
 	
-	public BPoint() {
+	public LocalPoint() {
 		/*For serialization*/
 	}
 	

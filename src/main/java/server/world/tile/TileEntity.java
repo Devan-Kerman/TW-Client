@@ -2,26 +2,24 @@ package server.world.tile;
 
 import java.awt.Point;
 
-import server.api.area.BPoint;
+import server.api.area.LocalPoint;
 import server.api.area.Locatable;
 import server.api.bytes.Assembable;
 import server.api.bytes.ByteReader;
 import server.api.bytes.Packer;
 import server.api.bytes.Packetable;
-import server.nation.Nation;
-import server.world.chunk.Chunk;
 
 public abstract class TileEntity implements Locatable, Assembable, Packetable {
 
 	Point chunk;
-	BPoint location;
+	LocalPoint location;
 
 	public TileEntity() {
-		location = new BPoint((byte) 0, (byte) 0);
+		location = new LocalPoint((byte) 0, (byte) 0);
 		chunk = new Point();
 	}
 
-	public TileEntity(Point chunk, BPoint location) {
+	public TileEntity(Point chunk, LocalPoint location) {
 		this.chunk = chunk;
 		this.location = location;
 	}
@@ -30,7 +28,6 @@ public abstract class TileEntity implements Locatable, Assembable, Packetable {
 
 	public abstract <T extends Assembable & Packetable> T data();
 
-	public abstract void run(Nation n, Chunk c, Tile t);
 
 	@Override
 	public float getX() {
@@ -52,7 +49,7 @@ public abstract class TileEntity implements Locatable, Assembable, Packetable {
 	@Override
 	public void from(ByteReader reader) {
 		chunk = reader.readPoint();
-		location = reader.read(BPoint.class);
+		location = reader.read(LocalPoint.class);
 		data().from(reader);
 	}
 

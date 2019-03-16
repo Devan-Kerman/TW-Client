@@ -46,6 +46,7 @@ public class DLogger {
 	 * Error = #ff0000 Warn = #ff6600 Info = #ffffff Debug = #33ccff Relief =
 	 * #99ff66
 	 */
+	@SuppressWarnings("unused")
 	private static String levelHex(Level l) {
 		if (l.intValue() == Level.SEVERE.intValue())
 			return "#ff0000";

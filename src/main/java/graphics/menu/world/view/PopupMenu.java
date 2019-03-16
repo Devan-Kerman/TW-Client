@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import main.Clientside;
-import server.api.area.BPoint;
+import server.api.area.LocalPoint;
 import server.world.chunk.ChunkManager;
 import server.world.tile.Tile;
 import server.world.tile.TileEntity;
@@ -25,7 +25,7 @@ public class PopupMenu extends JPopupMenu {
 			item.addActionListener(e -> {
 				boolean b = Clientside.claim(tx, ty);
 				if(b) {
-					BPoint point = Locations.getArray(tx, ty);
+					LocalPoint point = Locations.getArray(tx, ty);
 					ChunkManager.safeChunk(Locations.getChunk(tx, ty)).tiles[point.x][point.y].ownerid = Clientside.id;
 				} else
 					JOptionPane.showMessageDialog(null, "Failed to claim!", "Unable to claim", JOptionPane.CANCEL_OPTION);
@@ -46,10 +46,16 @@ public class PopupMenu extends JPopupMenu {
 				});
 				add(item);
 			} else {
-				JMenuItem item = new JMenuItem();
+				JMenuItem item = new JMenuItem("Destroy!");
 				item.addActionListener(e -> {
 					// TODO Tile Entity GUI
 				});
+				add(item);
+				item = new JMenuItem("View");
+				item.addActionListener(e -> {
+					// TODO view tile entities
+				});
+				add(item);
 			}
 		}
 		

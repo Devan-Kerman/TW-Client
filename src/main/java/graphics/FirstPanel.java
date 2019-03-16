@@ -40,7 +40,7 @@ public class FirstPanel extends JPanel {
 			if(resp == 0) {
 				JOptionPane.showMessageDialog(null, "Invalid registration!");
 			} else {
-				Clientside.game = new CFrame("Tile Wars Client 1.0", resp);
+				Clientside.mainframe = new CFrame("Tile Wars Client 1.0", resp);
 				Clientside.login.dispose();
 				JOptionPane.showMessageDialog(null, "Your ID is [" + resp + "] remember this, keep it somewhere safe!\nIt can also be found on your nation's stats page", "Welcome to Tile-Wars", JOptionPane.INFORMATION_MESSAGE);
 				Clientside.id = resp;
@@ -53,7 +53,7 @@ public class FirstPanel extends JPanel {
 			if(resp == 0) {
 				JOptionPane.showMessageDialog(null, "Invalid login!");
 			} else {
-				Clientside.game = new CFrame("Tile Wars Client 1.0", resp);
+				Clientside.mainframe = new CFrame("Tile Wars Client 1.0", resp);
 				Clientside.login.dispose();
 				Clientside.id = resp;
 			}
